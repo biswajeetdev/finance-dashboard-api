@@ -1,0 +1,277 @@
+### ─── HEALTH ─────────────────────────────────────────────────────────────────
+
+### 1. Health check
+GET http://localhost:3000/health
+
+###
+
+### ─── AUTH ───────────────────────────────────────────────────────────────────
+
+### 2. Register a new user
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "New User",
+  "email": "newuser@finance.com",
+  "password": "Test@1234",
+  "role": "viewer"
+}
+
+###
+
+### 3. Login as Admin  ← copy token into ADMIN_TOKEN below
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@finance.com",
+  "password": "Admin@123"
+}
+
+###
+
+### 4. Login as Analyst
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "analyst@finance.com",
+  "password": "Analyst@123"
+}
+
+###
+
+### 5. Login as Viewer
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "viewer@finance.com",
+  "password": "Viewer@123"
+}
+
+###
+
+### 6. Get own profile
+GET http://localhost:3000/api/auth/me
+Authorization: Bearer PASTE_TOKEN_HERE
+
+###
+
+### ─── RECORDS ─────────────────────────────────────────────────────────────────
+
+### 7. List records (paginated)
+GET http://localhost:3000/api/records?page=1&limit=5
+Authorization: Bearer PASTE_TOKEN_HERE
+
+###
+
+### 8. Filter by type=income
+GET http://localhost:3000/api/records?type=income
+Authorization: Bearer PASTE_TOKEN_HERE
+
+###
+
+### 9. Filter by date range
+GET http://localhost:3000/api/records?start_date=2025-01-01&end_date=2025-02-28
+Authorization: Bearer PASTE_TOKEN_HERE
+
+###
+
+### 10. Filter by category
+GET http://localhost:3000/api/records?category_id=1
+Authorization: Bearer PASTE_TOKEN_HERE
+
+###
+
+### 11. Search by notes
+GET http://localhost:3000/api/records?search=salary
+Authorization: Bearer PASTE_TOKEN_HERE
+
+###
+
+### 12. Sort by amount ascending
+GET http://localhost:3000/api/records?sort=amount&order=asc
+Authorization: Bearer PASTE_TOKEN_HERE
+
+###
+
+### 13. Create record (analyst/admin only)
+POST http://localhost:3000/api/records
+Content-Type: application/json
+Authorization: Bearer PASTE_TOKEN_HERE
+
+{
+  "amount": 5000,
+  "type": "expense",
+  "category_id": 3,
+  "date": "2026-04-04",
+  "notes": "Team lunch"
+}
+
+###
+
+### 14. Get single record (replace ID)
+GET http://localhost:3000/api/records/RECORD_ID_HERE
+Authorization: Bearer PASTE_TOKEN_HERE
+
+###
+
+### 15. Partial update record (analyst/admin)
+PUT http://localhost:3000/api/records/RECORD_ID_HERE
+Content-Type: application/json
+Authorization: Bearer PASTE_TOKEN_HERE
+
+{
+  "amount": 6000
+}
+
+###
+
+### 16. Delete record (admin only — soft delete)
+DELETE http://localhost:3000/api/records/RECORD_ID_HERE
+Authorization: Bearer PASTE_TOKEN_HERE
+
+###
+
+### 17. Try to create record as Viewer — should return 403
+POST http://localhost:3000/api/records
+Content-Type: application/json
+Authorization: Bearer PASTE_VIEWER_TOKEN_HERE
+
+{
+  "amount": 100,
+  "type": "expense",
+  "category_id": 1,
+  "date": "2026-04-04"
+}
+
+###
+
+### 18. Validation failure — missing required fields
+POST http://localhost:3000/api/records
+Content-Type: application/json
+Authorization: Bearer PASTE_TOKEN_HERE
+
+{
+  "type": "expense"
+}
+
+###
+
+### ─── DASHBOARD ───────────────────────────────────────────────────────────────
+
+### 19. Dashboard summary (all roles can view)
+GET http://localhost:3000/api/dashboard/summary
+Authorization: Bearer PASTE_TOKEN_HERE
+
+###
+
+### ─── USERS ───────────────────────────────────────────────────────────────────
+
+### 20. List users (admin/analyst)
+GET http://localhost:3000/api/users?page=1&limit=10
+Authorization: Bearer PASTE_TOKEN_HERE
+
+###
+
+### 21. Search users by name or email
+GET http://localhost:3000/api/users?search=admin
+Authorization: Bearer PASTE_TOKEN_HERE
+
+###
+
+### 22. Filter users by role
+GET http://localhost:3000/api/users?role=viewer&status=active
+Authorization: Bearer PASTE_TOKEN_HERE
+
+###
+
+### 23. Get single user (replace ID)
+GET http://localhost:3000/api/users/USER_ID_HERE
+Authorization: Bearer PASTE_TOKEN_HERE
+
+###
+
+### 24. Update user role (admin only)
+PUT http://localhost:3000/api/users/USER_ID_HERE
+Content-Type: application/json
+Authorization: Bearer PASTE_ADMIN_TOKEN_HERE
+
+{
+  "role": "analyst"
+}
+
+###
+
+### 25. Deactivate user (admin only — soft delete)
+DELETE http://localhost:3000/api/users/USER_ID_HERE
+Authorization: Bearer PASTE_ADMIN_TOKEN_HERE
+
+###
+
+### 26. Try accessing users as Viewer — should return 403
+GET http://localhost:3000/api/users
+Authorization: Bearer PASTE_VIEWER_TOKEN_HERE
+
+###
+
+### ─── CATEGORIES ──────────────────────────────────────────────────────────────
+
+### 27. List all categories (any authenticated user)
+GET http://localhost:3000/api/categories
+Authorization: Bearer PASTE_TOKEN_HERE
+
+###
+
+### 28. Create category (admin only)
+POST http://localhost:3000/api/categories
+Content-Type: application/json
+Authorization: Bearer PASTE_ADMIN_TOKEN_HERE
+
+{
+  "name": "Healthcare"
+}
+
+###
+
+### 29. Delete category (admin only)
+DELETE http://localhost:3000/api/categories/CATEGORY_ID_HERE
+Authorization: Bearer PASTE_ADMIN_TOKEN_HERE
+
+###
+
+### 30. Try creating category as Viewer — should return 403
+POST http://localhost:3000/api/categories
+Content-Type: application/json
+Authorization: Bearer PASTE_VIEWER_TOKEN_HERE
+
+{
+  "name": "Blocked"
+}
+
+###
+
+### ─── ERROR SCENARIOS ─────────────────────────────────────────────────────────
+
+### 31. No token — should return 401
+GET http://localhost:3000/api/records
+
+###
+
+### 32. Unknown route — should return 404
+GET http://localhost:3000/api/doesnotexist
+
+###
+
+### 33. Login with wrong password — should return 401
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@finance.com",
+  "password": "wrongpassword"
+}
+
+###
