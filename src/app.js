@@ -8,12 +8,23 @@ const rateLimit = require('express-rate-limit');
 const app = express();
 
 app.use(helmet());
-app.use(cors());
+
+const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:3000')
+  .split(',')
+  .map(o => o.trim());
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+}));
+
 app.use(morgan('dev'));
 app.use(express.json());
 
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000,
   max: 100,
   standardHeaders: true,
   legacyHeaders: false,
@@ -21,11 +32,19 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter);
 
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many auth attempts. Please try again later.' }
+});
+
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-app.use('/api/auth',       require('./routes/auth.routes'));
+app.use('/api/auth',       authLimiter, require('./routes/auth.routes'));
 app.use('/api/users',      require('./routes/users.routes'));
 app.use('/api/records',    require('./routes/records.routes'));
 app.use('/api/dashboard',  require('./routes/dashboard.routes'));
