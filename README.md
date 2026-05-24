@@ -1,5 +1,11 @@
 # Finance Dashboard API
 
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat&logo=nodedotjs&logoColor=white)
+![Express](https://img.shields.io/badge/Express-000000?style=flat&logo=express&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat&logo=postgresql&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-000000?style=flat&logo=jsonwebtokens&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript&logoColor=black)
+
 A role-based REST API backend for a finance dashboard system. Built with Node.js, Express, PostgreSQL, and JWT authentication.
 
 ## Features
@@ -25,7 +31,7 @@ A role-based REST API backend for a finance dashboard system. Built with Node.js
 
 ### 1. Clone and install
 ```bash
-git clone https://github.com/YOUR_USERNAME/finance-dashboard-api
+git clone https://github.com/biswajeetdev/finance-dashboard-api
 cd finance-dashboard-api
 npm install
 ```
