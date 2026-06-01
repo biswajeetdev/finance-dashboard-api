@@ -14,6 +14,8 @@ const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:3000')
   .map(o => o.trim());
 app.use(cors({
   origin: (origin, callback) => {
+    // Requests without an Origin header (curl, server-to-server, Postman) are allowed
+    // intentionally — this is a REST API, not a browser-only frontend.
     if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
     callback(new Error('Not allowed by CORS'));
   },
