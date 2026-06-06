@@ -17,9 +17,9 @@ exports.getForecast = async (req, res, next) => {
     // lookback window mirrors the forecast horizon (min 3 months for stability)
     const lookback = Math.max(3, horizon);
 
-    const cutoff = db.raw(
-      `NOW() - INTERVAL '${lookback} months'`
-    );
+    const cutoffDate = new Date();
+    cutoffDate.setMonth(cutoffDate.getMonth() - lookback);
+    const cutoff = cutoffDate.toISOString().slice(0, 10);
 
     const history = await db('financial_records')
       .where({ is_deleted: false })
@@ -32,14 +32,14 @@ exports.getForecast = async (req, res, next) => {
       .groupByRaw("TO_CHAR(date, 'YYYY-MM'), type")
       .orderByRaw("TO_CHAR(date, 'YYYY-MM')");
 
-    // Compute monthly averages per type
-    const byType = { income: [], expense: [] };
+    // Divide by calendar window (lookback) not by months-with-data to avoid
+    // overstating averages when activity is sparse (e.g. income in 2 of 6 months).
+    const totals = { income: 0, expense: 0 };
     for (const row of history) {
-      if (byType[row.type]) byType[row.type].push(Number(row.total));
+      if (totals[row.type] !== undefined) totals[row.type] += Number(row.total);
     }
-    const avg = (arr) => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
-    const avgIncome  = avg(byType.income);
-    const avgExpense = avg(byType.expense);
+    const avgIncome  = totals.income  / lookback;
+    const avgExpense = totals.expense / lookback;
 
     // Category-level averages for expense breakdown
     const catHistory = await db('financial_records as r')
@@ -69,8 +69,9 @@ exports.getForecast = async (req, res, next) => {
     }));
 
     res.json({
-      lookback_months:   lookback,
-      forecast_horizon:  horizon,
+      method:              'rolling_average',
+      lookback_months:     lookback,
+      forecast_horizon:    horizon,
       avg_monthly_income:   Number(avgIncome.toFixed(2)),
       avg_monthly_expenses: Number(avgExpense.toFixed(2)),
       forecast,
