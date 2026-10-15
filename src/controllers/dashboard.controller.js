@@ -48,17 +48,15 @@ exports.getForecast = async (req, res, next) => {
       .where('r.date', '>=', cutoff)
       .select(
         'c.name as category',
-        db.raw('SUM(r.amount) AS total'),
-        db.raw(`COUNT(DISTINCT TO_CHAR(r.date, 'YYYY-MM')) AS months_active`)
+        db.raw('SUM(r.amount) AS total')
       )
       .groupBy('c.name')
       .orderBy('total', 'desc');
 
+    // Same calendar-window divisor as the totals, so the categories add up to avg_monthly_expenses.
     const categoryForecast = catHistory.map((row) => ({
-      category:         row.category,
-      projected_monthly: Number(
-        (Number(row.total) / Math.max(1, Number(row.months_active))).toFixed(2)
-      ),
+      category:          row.category,
+      projected_monthly: Number((Number(row.total) / lookback).toFixed(2)),
     }));
 
     const forecast = nextMonths(horizon).map((month) => ({
